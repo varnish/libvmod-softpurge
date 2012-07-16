@@ -1,0 +1,27 @@
+varnishtest "Test softpurge vmod"
+
+server s1 {
+       rxreq
+       txresp
+} -start
+
+varnish v1 -vcl+backend {
+	import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
+	
+	sub vcl_hit {
+		softpurge.softpurge();
+		error 760 "purged ok";
+	}
+} -start
+
+client c1 {
+	txreq -url "/"
+	rxresp
+	expect resp.status == 200
+
+	txreq -url "/"
+	rxresp
+	expect resp.status == 760
+}
+
+client c1 -run
