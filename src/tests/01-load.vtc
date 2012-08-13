@@ -1,4 +1,4 @@
-varnishtest "Test example vmod"
+varnishtest "Test softpurge vmod"
 
 server s1 {
        rxreq
@@ -6,17 +6,14 @@ server s1 {
 } -start
 
 varnish v1 -vcl+backend {
-	import example from "${vmod_topbuild}/src/.libs/libvmod_example.so";
+	import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
 
-	sub vcl_deliver {
-		set resp.http.hello = example.hello("World");
-	}
 } -start
 
 client c1 {
 	txreq -url "/"
 	rxresp
-	expect resp.http.hello == "Hello, World"
+	expect resp.status == 200
 }
 
 client c1 -run
