@@ -1,0 +1,54 @@
+varnishtest "Test softpurge vmod"
+
+server s1 {
+       rxreq
+       txresp
+} -start
+
+varnish v1 -vcl+backend {
+	import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
+
+	backend b1 {
+		.host = "${s1_addr}";
+		.port = "${s1_port}";
+	}
+
+	sub vcl_recv {
+	    set req.backend = b1;
+	    set req.grace = 10m;
+	}
+
+	sub vcl_fetch {
+	    set beresp.grace = 10m;
+	}
+	sub vcl_hit {
+		if (req.request == "PURGE") {
+			softpurge.softpurge();
+			error 760 "purged ok";
+		}
+	}
+	sub vcl_deliver {
+		if (obj.hits > 0) { set resp.http.X-Status = "HIT"; } else { set resp.http.X-Status = "miss"; }
+	}
+} -start
+
+client c1 {
+	txreq -url "/"
+	rxresp
+
+	txreq -url "/"
+	rxresp
+	expect resp.http.X-Status == "HIT"
+
+	txreq -url "/" -req PURGE
+	rxresp
+	expect resp.status == 760
+} -run
+
+varnish v1 -cliok "backend.set_health b1 sick"
+
+client c1 {
+	txreq -url "/"
+	rxresp
+} -run
+
