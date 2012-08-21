@@ -1,54 +1,58 @@
-============
-vmod_example
-============
+==============
+vmod_softpurge
+==============
 
 ----------------------
-Varnish Example Module
+Softpurge in Varnish
 ----------------------
 
-:Author: Martin Blix Grydeland
-:Date: 2011-05-26
+:Author: Lasse Karstensen
+:Date: 2012-08-21
 :Version: 1.0
-:Manual section: 3
+:Manual section: 1
 
 SYNOPSIS
 ========
 
-import example;
+import softpurge;
 
 DESCRIPTION
 ===========
 
-Example Varnish vmod demonstrating how to write an out-of-tree Varnish vmod.
+``Softpurge`` is cache invalidation in Varnish that reduces TTL but keeps the grace
+value of a resource.
 
-Implements the traditional Hello World as a vmod.
+This makes it possible to serve purged content to users if
+a backend is unavailable and fresh content can not be fetched.
+
 
 FUNCTIONS
 =========
 
-hello
------
+softpurge
+---------
 
 Prototype
         ::
 
-                hello(STRING S)
+                softpurge()
 Return value
-	STRING
+	NULL
+
 Description
-	Returns "Hello, " prepended to S
+	Performs a soft purge. Valid in vcl_hit and vcl_miss.
+
 Example
         ::
 
-                set resp.http.hello = example.hello("World");
+                sub vcl_hit {
+			if (req.method == "PURGE") {
+				softpurge.softpurge();
+			}
+		}
 
 INSTALLATION
 ============
-
-This is an example skeleton for developing out-of-tree Varnish
-vmods. It implements the "Hello, World!" as a vmod callback. Not
-particularly useful in good hello world tradition, but demonstrates how
-to get the glue around a vmod working.
 
 The source tree is based on autotools to configure the building, and
 does also have the necessary bits in place to do functional unit tests
@@ -72,25 +76,29 @@ Make targets:
 * make install - installs your vmod in `VMODDIR`
 * make check - runs the unit tests in ``src/tests/*.vtc``
 
+
 In your VCL you could then use this vmod along the following lines::
-        
-        import example;
 
-        sub vcl_deliver {
-                # This sets resp.http.hello to "Hello, World"
-                set resp.http.hello = example.hello("World");
+        import softpurge;
+
+        sub vcl_recv {
+		if (req.method == "PURGE") { return(lookup); }
+	}
+
+        sub vcl_hit {
+                if (req.method == "PURGE) {
+			softpurge.softpurge();
+			error 200 "Successful softpurge";
+		}
         }
-
-HISTORY
-=======
-
-This manual page was released as part of the libvmod-example package,
-demonstrating how to create an out-of-tree Varnish vmod.
+        sub vcl_miss {
+                if (req.method == "PURGE) {
+			softpurge.softpurge();
+			error 200 "Successful softpurge";
+		}
+        }
 
 COPYRIGHT
 =========
 
-This document is licensed under the same license as the
-libvmod-example project. See LICENSE for details.
-
-* Copyright (c) 2011 Varnish Software
+* Copyright (c) 2012 Varnish Software
