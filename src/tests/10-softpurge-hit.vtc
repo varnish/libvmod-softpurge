@@ -10,6 +10,9 @@ server s1 {
 
 	rxreq
 	txresp
+
+	rxreq
+	txresp
 } -start
 
 varnish v1 -vcl+backend {
@@ -80,7 +83,6 @@ varnish v1 -vcl+backend {
 		set resp.http.x-object-ttl     = req.http.x-ttl;
 		set resp.http.x-object-grace   = req.http.x-grace;
 
-		#set resp.http.x-backend-health = req.backend.healthy;
 		set resp.http.x-via = req.http.x-via;
 
 		set resp.http.x-ttl-negative = req.http.x-ttl-negative;
@@ -105,25 +107,18 @@ client c1 {
 	rxresp
 } -run
 
-# check that it has been purged for normal requests
-#client c2 {
-#	txreq -url "/"
-#	txreq -url "/" -hdr "x-sick-please: yes"
-#	rxresp
-#	expect resp.status == 503
-#} -run
-
-#client c3 {
-# 	delay 1
-#	txreq -url "/not-in-cache" -hdr "x-sick-please: yes"
-#	rxresp
-#	expect resp.status == 503
-#} -run
-
-client c4 {
+client c2 {
 	txreq -url "/" -hdr "x-sick-please: yes"
 	rxresp
 	expect resp.http.x-via == "hit"
 	expect resp.http.x-ttl-negative == true
+} -run
+
+# check that it has been purged for normal requests.
+# this will be a miss and then fetch since we've purged the previous one.
+client c3 {
+	txreq -url "/"
+	rxresp
+	expect resp.status == 200
 } -run
 
