@@ -23,26 +23,24 @@ vmod_softpurge(struct sess *sp)
 	unsigned u;
 
 	// we don't have the VCL_MET_HIT/MISS values here, and hardcoding
-	// them isn't the best of ideas. If we have an obj we'er in hit. sp->cur_method later on.
-	// if (sp->cur_method == VCL_MET_HIT) {
+	// them isn't the best of ideas. If we have an obj we're in hit. Use
+	// sp->cur_method at some later stage.
 	if (sp->obj != NULL) {
     	CHECK_OBJ_NOTNULL(sp->obj, OBJECT_MAGIC);
 		CHECK_OBJ_NOTNULL(sp->obj->objcore, OBJCORE_MAGIC);
 		CHECK_OBJ_NOTNULL(sp->obj->objcore->objhead, OBJHEAD_MAGIC);
 		oh = sp->obj->objcore->objhead;
 		VSL(SLT_Debug, 0, "Softpurge running inside vcl_hit");
-        // } else if (sp->cur_method == VCL_MET_MISS) {
 	} else if (sp->objcore != NULL) {
 		CHECK_OBJ_NOTNULL(sp->objcore, OBJCORE_MAGIC);
 		CHECK_OBJ_NOTNULL(sp->objcore->objhead, OBJHEAD_MAGIC);
 		oh = sp->objcore->objhead;
 		VSL(SLT_Debug, 0, "Softpurge running inside vcl_miss");
 	} else {
-		VSL(SLT_Debug, 0, "softpurge() only valid in vcl_hit and vcl_miss");
+		VSL(SLT_Debug, 0, "softpurge() is only valid in vcl_hit and vcl_miss.");
 		return;
 	}
 
-	VSL(SLT_Debug, 0, "found oh");
 	CHECK_OBJ_NOTNULL(oh, OBJHEAD_MAGIC);
 
 	spc = WS_Reserve(sp->wrk->ws, 0);
@@ -55,12 +53,6 @@ vmod_softpurge(struct sess *sp)
 		CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 		assert(oc->objhead == oh);
 		if (oc->flags & OC_F_BUSY) {
-			/*
-                         * We cannot purge busy objects here, because their
-                         * owners have special rights to them, and may nuke
-                         * them without concern for the refcount, which by
-                         * definition always must be one, so they don't check.
-                         */
 			continue;
 		}
 
@@ -74,23 +66,33 @@ vmod_softpurge(struct sess *sp)
 	Lck_Unlock(&oh->mtx);
 
 	for (n = 0; n < nobj; n++) {
-		VSL(SLT_Debug, 0, "considering object %i", n);
 		oc = ocp[n];
 		CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 		o = oc_getobj(sp->wrk, oc);
 		VSL(SLT_Debug, 0, "foo %i", n);
 		if (o == NULL) {
-			VSL(SLT_Debug, 0, "object %i refered to by objectcore is null", n);
 			continue;
 		}
 		CHECK_OBJ_NOTNULL(o, OBJECT_MAGIC);
 
-		o->exp.ttl = -1.;
+		/*
+		   object really expires at o->exp.entered + o->exp.ttl, or at
+		   an earlier point for this request if overridden in TTL.
+		*/
 
-		// reshuffle the lru tree since timers has changed.
+		VSL(SLT_Debug, 0, "XX: object BEFORE.  ttl ends in %.3f, grace ends in %.3f for object %i",
+				(EXP_Ttl(sp, o)-TIM_real()),
+				(EXP_Grace(sp, o)-TIM_real()), n);
+
+		// Move o->exp.entered back in time so that TTL expiry time is now.
+		o->exp.entered = o->exp.entered - (EXP_Ttl(sp, o) - TIM_real());
+
+		// Reshuffle the LRU tree since timers has changed.
 		EXP_Rearm(o);
 
-		VSL(SLT_Debug, 0, "object updated. ttl is %.3f, grace is %.3f for object %i", o->exp.ttl, o->exp.grace, n);
+		VSL(SLT_Debug, 0, "XX: object updated. ttl ends in %.3f, grace ends in %.3f for object %i",
+				(EXP_Ttl(sp, o)-TIM_real()),
+				(EXP_Grace(sp, o)-TIM_real()), n);
 	}
 	WS_Release(sp->wrk->ws, 0);
 }
