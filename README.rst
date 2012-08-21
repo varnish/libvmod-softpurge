@@ -82,8 +82,10 @@ In your VCL you could then use this vmod along the following lines::
         import softpurge;
 
         sub vcl_recv {
+                set req.grace = 10m;
 		if (req.method == "PURGE") { return(lookup); }
 	}
+        sub vcl_fetch { set beresp.grace = 10m; }
 
         sub vcl_hit {
                 if (req.method == "PURGE) {
