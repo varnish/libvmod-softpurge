@@ -92,6 +92,8 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
+
+# Warm the cache
 client c1 {
 	txreq -url "/"
 	rxresp
@@ -102,11 +104,13 @@ client c1 {
 	expect resp.http.x-via == "hit"
 } -run
 
+# Softpurge the object.
 client c1 {
 	txreq -req "PURGE" -url "/"
 	rxresp
 } -run
 
+# Pretend backend is dead, should give a graced hit.
 client c2 {
 	txreq -url "/" -hdr "x-sick-please: yes"
 	rxresp
