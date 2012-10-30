@@ -21,7 +21,9 @@ vmod_softpurge(struct sess *sp)
 	unsigned spc, nobj, n, ttl;
 	struct object *o;
 	unsigned u;
+	double now;
 
+	now = TIM_real();
 	// we don't have the VCL_MET_HIT/MISS values here, and hardcoding
 	// them isn't the best of ideas. If we have an obj we're in hit. Use
 	// sp->cur_method at some later stage.
@@ -81,18 +83,18 @@ vmod_softpurge(struct sess *sp)
 		*/
 
 		VSL(SLT_Debug, 0, "XX: object BEFORE.  ttl ends in %.3f, grace ends in %.3f for object %i",
-				(EXP_Ttl(sp, o)-TIM_real()),
-				(EXP_Grace(sp, o)-TIM_real()), n);
+				(EXP_Ttl(sp, o) - now),
+				(EXP_Grace(sp, o) - now), n);
 
 		// Update the object's TTL so that it expires right now.
-		o->exp.ttl = TIM_real() - o->exp.entered;
+		o->exp.ttl = now - o->exp.entered;
 
 		// Reshuffle the LRU tree since timers has changed.
 		EXP_Rearm(o);
 
 		VSL(SLT_Debug, 0, "XX: object updated. ttl ends in %.3f, grace ends in %.3f for object %i",
-				(EXP_Ttl(sp, o)-TIM_real()),
-				(EXP_Grace(sp, o)-TIM_real()), n);
+				(EXP_Ttl(sp, o) - now),
+				(EXP_Grace(sp, o) - now), n);
 	}
 	WS_Release(sp->wrk->ws, 0);
 }
