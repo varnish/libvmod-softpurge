@@ -87,7 +87,8 @@ vmod_softpurge(struct sess *sp)
 				(EXP_Grace(sp, o) - now), n);
 
 		// Update the object's TTL so that it expires right now.
-		o->exp.ttl = now - o->exp.entered;
+		if (o->exp.ttl > (now - o->exp.entered))
+			o->exp.ttl = now - o->exp.entered;
 
 		// Reshuffle the LRU tree since timers has changed.
 		EXP_Rearm(o);
