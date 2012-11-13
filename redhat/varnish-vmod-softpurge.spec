@@ -6,8 +6,6 @@ License: BSD
 Group: System Environment/Daemons
 Source0: ./libvmod-softpurge.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-# we need EPEL, or at least mhash + mhash-devel from it:
-# rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-7.noarch.rpm
 Requires: varnish > 3.0
 BuildRequires: make, autoconf, automake, libtool, python-docutils
 
@@ -35,11 +33,15 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-# /opt/varnish/lib/varnish/vmods/
 /usr/lib64/varnish/vmods/
 %doc /usr/share/doc/%{name}/*
-#%{_mandir}/man3/*.3*
-/usr/man/man?/*gz
+# workaround to get manpath correct.
+
+%if "%{RHVERSION}" == "EL5"
+%{_mandir}/man3/*.3*
+%else
+/usr/share/man/man?/*
+%endif 
 
 %changelog
 * Thu Oct 11 2012 Lasse Karstensen <lasse@varnish-software.com> - 0.1-0
