@@ -38,7 +38,7 @@ rm -rf %{buildroot}
 # workaround to get manpath correct.
 
 %if "%{RHVERSION}" == "EL5"
-%{_mandir}/man3/*.3*
+/usr/man/man?/*
 %else
 /usr/share/man/man?/*
 %endif 
