@@ -1,5 +1,5 @@
-Summary: varnish-vmod-softpurge
-Name: varnish-vmod-softpurge
+Summary: Soft purge support for Varnish VCL
+Name: vmod-varnish-%{VARNISHVER}-softpurge
 Version: 0.1
 Release: 1%{?dist}
 License: BSD
