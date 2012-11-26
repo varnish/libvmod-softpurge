@@ -90,12 +90,17 @@ vmod_softpurge(struct sess *sp)
 		if (o->exp.ttl > (now - o->exp.entered))
 			o->exp.ttl = now - o->exp.entered;
 
-		// Reshuffle the LRU tree since timers has changed.
-		EXP_Rearm(o);
-
 		VSL(SLT_Debug, 0, "XX: object updated. ttl ends in %.3f, grace ends in %.3f for object %i",
 				(EXP_Ttl(sp, o) - now),
 				(EXP_Grace(sp, o) - now), n);
+
+		// Reshuffle the LRU tree since timers has changed.
+		EXP_Rearm(o);
+
+		// decrease refcounter and clean up if the object has been removed.
+		(void)HSH_Deref(sp->wrk, NULL, &o);
+
+
 	}
 	WS_Release(sp->wrk->ws, 0);
 }
