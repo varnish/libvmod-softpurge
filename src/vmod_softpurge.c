@@ -71,7 +71,6 @@ vmod_softpurge(struct sess *sp)
 		oc = ocp[n];
 		CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 		o = oc_getobj(sp->wrk, oc);
-		VSL(SLT_Debug, 0, "foo %i", n);
 		if (o == NULL) {
 			continue;
 		}
