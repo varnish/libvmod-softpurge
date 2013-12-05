@@ -7,7 +7,7 @@ server s1 {
 
 varnish v1 -vcl+backend {
 	import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
-	import std;
+	#import std;
 
 	backend b1 {
 		.host = "${s1_addr}";
@@ -49,13 +49,13 @@ varnish v1 -vcl+backend {
 	}
 
 	sub vcl_miss {
-		std.log("inside vcl_miss");
+		#std.log("inside vcl_miss");
 		set req.http.x-via = "miss";
 		if (req.request == "PURGE") { call purge_and_restart; }
 	}
 
 	sub vcl_hit {
-		std.log("inside vcl_hit");
+		#std.log("inside vcl_hit");
 		set req.http.x-via = "hit";
 		if (req.request == "PURGE") { call purge_and_restart; }
 

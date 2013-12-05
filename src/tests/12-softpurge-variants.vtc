@@ -8,7 +8,7 @@ server s1 {
 
 varnish v1 -vcl+backend {
 	import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
-	import std;
+	#import std;
 
 	sub vcl_recv {
 		set req.grace = 10m;
@@ -24,12 +24,12 @@ varnish v1 -vcl+backend {
 	}
 
 	sub vcl_miss {
-		std.log("inside vcl_miss");
+		#std.log("inside vcl_miss");
 		set req.http.x-via = "miss";
 	}
 
 	sub vcl_hit {
-		std.log("inside vcl_hit");
+		#std.log("inside vcl_hit");
 		set req.http.x-via = "hit";
 		if (req.request == "PURGE") {
 			softpurge.softpurge();
