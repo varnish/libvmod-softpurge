@@ -1,7 +1,7 @@
 Summary: Soft purge support for Varnish VCL
 Name: vmod-softpurge
 Version: 0.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Daemons
 Source0: libvmod-softpurge.tar.gz
