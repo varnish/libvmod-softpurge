@@ -5,6 +5,9 @@ SUBDIRS = src
 doc_DATA = README.rst LICENSE
 
 dist_man_MANS = vmod_softpurge.3
+
+EXTRA_DIST = vmod-*spec debian
+
 MAINTAINERCLEANFILES = $(dist_man_MANS)
 
 vmod_softpurge.3: README.rst
