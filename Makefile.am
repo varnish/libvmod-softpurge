@@ -2,8 +2,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src
 
-doc_DATA = README.rst LICENSE
+DISTCHECK_CONFIGURE_FLAGS = \
+	VMOD_DIR='$${libdir}/varnish/vmods'
 
+doc_DATA = README.rst LICENSE
 dist_man_MANS = vmod_softpurge.3
 
 EXTRA_DIST = vmod-*spec debian
