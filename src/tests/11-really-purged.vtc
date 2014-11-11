@@ -42,13 +42,18 @@ varnish v1 -vcl+backend {
 			set req.url = "/exists";
 			set req.method = "GET";
 			unset req.http.x-via;
+	
 			return(restart);
 		}
+		set req.http.x-ttl = obj.ttl;
+		set req.http.x-grace = obj.grace;
 	}
 
 	sub vcl_deliver {
 		set resp.http.x-object-hits = obj.hits;
 		set resp.http.x-via = req.http.x-via;
+		set resp.http.x-object-ttl = req.http.x-ttl;
+		set resp.http.x-object-grace = req.http.x-grace;
 	}
 
 } -start
