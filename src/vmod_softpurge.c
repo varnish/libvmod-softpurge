@@ -30,14 +30,9 @@ struct objhead {
 #define hoh_list _u.n.u_n_hoh_list
 #define hoh_head _u.n.u_n_hoh_head
 };
+
 double VTIM_real(void);
 int HSH_DerefObj(struct dstat *, struct object **o);
-
-int
-init_function(struct vmod_priv *priv, const struct VCL_conf *conf)
-{
-	return (0);
-}
 
 void
 vmod_softpurge(const struct vrt_ctx *vrt)
@@ -51,9 +46,7 @@ vmod_softpurge(const struct vrt_ctx *vrt)
 	double now;
        
 	now = VTIM_real();
-	// we don't have the VCL_MET_HIT/MISS values here, and hardcoding
-	// them isn't the best of ideas. If we have an obj we're in hit. Use
-	// ctx->cur_method at some later stage.
+
 	if (vrt->req->obj != NULL) {
 	    	CHECK_OBJ_NOTNULL(vrt->req->obj, OBJECT_MAGIC);
 	    	CHECK_OBJ_NOTNULL(vrt->req->obj->objcore, OBJCORE_MAGIC);
@@ -104,7 +97,7 @@ vmod_softpurge(const struct vrt_ctx *vrt)
 			CHECK_OBJ_NOTNULL(o, OBJECT_MAGIC);
 
 		/*
-		   object really expires at o->exp.entered + o->exp.ttl, or at
+		   object really expires at o->exp.t_origin + o->exp.ttl, or at
 		   an earlier point for this request if overridden in TTL.
 		*/
 
@@ -114,14 +107,11 @@ vmod_softpurge(const struct vrt_ctx *vrt)
 
 		// Update the object's TTL so that it expires right now.
 		if (o->exp.ttl > (now - o->exp.t_origin))
-			o->exp.ttl = now - o->exp.t_origin; /*  */
+		    EXP_Rearm(o, now, now - o->exp.t_origin, o->exp.grace, o->exp.keep);
 
 		VSL(SLT_Debug, 0, "XX: object updated. ttl ends in %.3f, grace ends in %.3f for object %i",
 				(EXP_Ttl(vrt->req, o) - now),
                                 (EXP_Ttl(vrt->req, o) + o->exp.grace - now), n);
-
-		// Reshuffle the LRU tree since timers has changed.
-		EXP_Rearm(o, now, 0, 0, 0);
 
 		// decrease refcounter and clean up if the object has been removed.
 		(void)HSH_DerefObj(&vrt->req->wrk->stats, &o);
