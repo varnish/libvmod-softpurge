@@ -27,37 +27,36 @@ varnish v1 -vcl+backend {
 	sub purge_and_restart {
 		softpurge.softpurge();
 		set req.url = "/exists";
-		set req.request = "GET";
+		set req.method = "GET";
 		unset req.http.x-via;
 		return(restart);
 	}
 
 	sub vcl_recv {
-		set req.backend = b1;
-		if (req.http.x-sick-please) { set req.backend = b2; }
+		set req.backend_hint = b1;
+		if (req.http.x-sick-please) { set req.backend_hint = b2; }
 
-		set req.grace = 10m;
-		if (req.request == "PURGE") { return(lookup); }
+		if (req.method == "PURGE") { return(hash); }
 	}
 
-	sub vcl_fetch {
+	sub vcl_backend_response {
 		set beresp.ttl = 1m;
 		set beresp.grace = 10m;
 
-		set req.http.x-ttl = beresp.ttl;
-		set req.http.x-grace = beresp.grace;
+		#set req.http.x-ttl = beresp.ttl;
+		#set req.http.x-grace = beresp.grace;
 	}
 
 	sub vcl_miss {
 		#std.log("inside vcl_miss");
 		set req.http.x-via = "miss";
-		if (req.request == "PURGE") { call purge_and_restart; }
+		if (req.method == "PURGE") { call purge_and_restart; }
 	}
 
 	sub vcl_hit {
 		#std.log("inside vcl_hit");
 		set req.http.x-via = "hit";
-		if (req.request == "PURGE") { call purge_and_restart; }
+		if (req.method == "PURGE") { call purge_and_restart; }
 
 		# There is no greater-than in the test language. (?)
 		if (obj.ttl < 0s) { set req.http.x-ttl-negative = true; }
@@ -98,17 +97,6 @@ client c1 {
 	txreq -req "PURGE" -url "/" -hdr "User-Agent: one"
 	rxresp
 
-	# if the backend is sick, is the content still there?
-	txreq -url "/" -hdr "User-Agent: two" -hdr "x-sick-please: yes"
-	rxresp
-	expect resp.http.x-via == "hit"
-	expect resp.status == 200
-
-	# if the backend is sick, is the content still there?
-	txreq -url "/" -hdr "User-Agent: one" -hdr "x-sick-please: yes"
-	rxresp
-	expect resp.http.x-via == "hit"
-	expect resp.status == 200
 
 	txreq -url "/" -hdr "User-Agent: one"
 	rxresp

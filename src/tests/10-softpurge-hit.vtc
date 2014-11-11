@@ -17,113 +17,100 @@ server s1 {
 
 varnish v1 -vcl+backend {
 	import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
-	#import std;
+	import std;
 
 	backend b1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
 	}
 
-	# always sick
 	backend b2 {
 		.host = "127.0.0.1";
 		.port = "12313";
-		# Keep this for better results in having the backend marked as sick. ;-)
-		.probe = {
-			.initial = 0;
-		}
+	
 	}
-
 	sub vcl_recv {
-		set req.backend = b1;
-		if (req.http.x-sick-please) { set req.backend = b2; }
-
-		set req.grace = 10m;
-
-		if (req.request == "PURGE") {
-			return(lookup);
-		}
+		set req.http.grace = "none";	
+		if (req.url == "/sick") {
+		   set req.backend_hint = b2;
+		   set req.http.x-backend = "sick";
+		   } else {set req.backend_hint = b1;}
+		   
+		   
+		   if (req.method == "PURGE") {
+		      return(hash);
+		   }
 	}
 
-	sub vcl_fetch {
-		set beresp.ttl = 1m;
-		set beresp.grace = 10m;
 
-		set req.http.x-ttl = beresp.ttl;
-		set req.http.x-grace = beresp.grace;
+	sub vcl_backend_response {
+	    	set beresp.ttl = 10s;
+	        set beresp.grace = 1h;
 	}
-
+	
 	sub vcl_miss {
-		#std.log("inside vcl_miss");
-		set req.http.x-via = "miss";
-	}
+	set req.http.x-via = "miss";
 
+	}
 	sub vcl_hit {
-		#std.log("inside vcl_hit");
-		set req.http.x-via = "hit";
-		if (req.request == "PURGE") {
-			softpurge.softpurge();
-
-			set req.url = "/exists";
-			set req.request = "GET";
-			unset req.http.x-via;
-			return(restart);
-		}
-
-		# There is no greater-than in the test language. (?)
-		if (obj.ttl < 0s) { set req.http.x-ttl-negative = true; }
-		else { set req.http.x-ttl-negative = false; }
-
-		set req.http.x-ttl = obj.ttl;
-		set req.http.x-grace = obj.grace;
-	}
+	set req.http.x-via = "hit";
+if (req.method == "PURGE") {
+softpurge.softpurge();
+set req.url = "/exists";
+set req.method = "GET";
+set req.http.x-via = "hit";
+return(deliver);
+}
+  if (obj.ttl >= 0s) {
+    # normal hit
+    return (deliver);
+  }
+  # We have no fresh fish. Lets look at the stale ones.
+  if (std.healthy(req.backend_hint)) {
+    # Backend is healthy. Limit age to 10s.
+    if (obj.ttl + 10s > 0s) {
+      set req.http.grace = "normal(limited)";
+      return (deliver);
+    } else {
+      # No candidate for grace. Fetch a fresh object.
+      return(fetch);
+   }
+  } else {
+    # backend is sick - use full grace
+    if (obj.ttl + obj.grace > 0s) {
+      set req.http.grace = "full";
+      return (deliver);
+    } else {
+     # no graced object.
+    return (fetch);
+   }
+  }
+}
 
 	sub vcl_deliver {
-		set resp.http.x-object-hits = obj.hits;
-		set resp.http.x-object-ttl     = req.http.x-ttl;
-		set resp.http.x-object-grace   = req.http.x-grace;
-
+ 	    	set resp.http.grace = req.http.grace;
+		set resp.http.backend = req.http.backend;
 		set resp.http.x-via = req.http.x-via;
-
-		set resp.http.x-ttl-negative = req.http.x-ttl-negative;
-
-		#std.log("YY: ttl is " + req.http.x-ttl);
-		#std.log("YY: grace is " + req.http.x-grace);
 	}
+
 } -start
 
 
 # Warm the cache
 client c1 {
-	txreq -url "/"
-	rxresp
-
-	txreq -url "/"
-	rxresp
-	expect resp.status == 200
-	expect resp.http.x-via == "hit"
+       txreq -url "/"
+       rxresp
+       txreq -url "/"
+       rxresp
+       expect resp.status == 200
+       expect resp.http.x-via == "hit"
 } -run
 
 # Softpurge the object.
 client c1 {
-	txreq -req "PURGE" -url "/"
-	rxresp
+       txreq -req "PURGE" -url "/"
+       rxresp
+       expect resp.http.x-via == "hit"
 } -run
 
-# Pretend backend is dead, should give a graced hit.
-client c2 {
-	txreq -url "/" -hdr "x-sick-please: yes"
-	rxresp
-	expect resp.http.x-via == "hit"
-	expect resp.http.x-ttl-negative == true
-} -run
-
-# check that it has been purged for normal requests.
-# this will be a miss and then fetch since we've purged the previous one.
-client c3 {
-	txreq -url "/"
-	rxresp
-        expect resp.http.x-via == "miss"
-	expect resp.status == 200
-} -run
 

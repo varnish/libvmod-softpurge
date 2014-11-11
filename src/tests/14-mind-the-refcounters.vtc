@@ -17,12 +17,12 @@ varnish v1 -vcl+backend {
        }
 
        sub vcl_recv {
-               set req.backend = b1;
-
-               if (req.request ~ "PURGE") { return(lookup); }
+               set req.backend_hint = b1;    
+	       if (req.method == "PURGE") { return(hash); } 
+			if (req.method == "SOFTPURGE") { return(hash); } 
        }
 
-       sub vcl_fetch {
+       sub vcl_backend_response {
                set beresp.ttl = 5s;
                set beresp.grace = 5s;
        }
@@ -33,19 +33,20 @@ varnish v1 -vcl+backend {
 
        sub vcl_hit {
                set req.http.x-via = "hit";
-
-               if (req.request == "PURGE") {
-                       purge;
-                       error 200 "Purged";
-               } else if (req.request == "SOFTPURGE") {
+          if (req.method == "SOFTPURGE") {
+	     		 set req.http.x-via = "hit";
+				 set req.http.msg = "Softpurged";
                        softpurge.softpurge();
-                       error 200 "Softpurged";
-               }
-       }
+	       }
+		if (req.method == "PURGE") {
+	    	set req.http.msg = "Purged";
+		}    
+	   }
 
        sub vcl_deliver {
                set resp.http.x-object-hits = obj.hits;
                set resp.http.x-via = req.http.x-via;
+			set resp.http.msg = req.http.msg;
        }
 
 } -start
@@ -62,22 +63,19 @@ client c1 {
        # run the softpurge
        txreq -req "SOFTPURGE" -url "/"
        rxresp
-       expect resp.status == 200
-       expect resp.msg == "Softpurged"
-} -run
+ } -run
 
 client c2 {
-       # check that it was a miss + successful fetch.
-       txreq -url "/"
-       rxresp
-       expect resp.http.x-via == "miss"
-       expect resp.status == 200
-       expect resp.http.x-object-hits == 0
-
-       txreq -req "PURGE" -url "/"
-       rxresp
-       expect resp.status == 200
-       expect resp.msg == "Purged"
+# check that it was a miss + successful fetch.
+	txreq -url "/"
+	rxresp
+	expect resp.http.x-via == "miss"
+	expect resp.status == 200
+	expect resp.http.x-object-hits == 0
+	txreq -req "PURGE" -url "/"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.msg == "Purged"
 } -run
 
 delay 20

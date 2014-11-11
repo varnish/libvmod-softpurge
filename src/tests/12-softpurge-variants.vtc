@@ -11,16 +11,13 @@ varnish v1 -vcl+backend {
 	#import std;
 
 	sub vcl_recv {
-		set req.grace = 10m;
-		if (req.request == "PURGE") { return(lookup); }
+		#set req.grace = 10m;
+		if (req.method == "PURGE") { return(hash); }
 	}
 
-	sub vcl_fetch {
+	sub vcl_backend_response {
 		set beresp.ttl = 1m;
 		set beresp.grace = 10m;
-
-		set req.http.x-ttl = beresp.ttl;
-		set req.http.x-grace = beresp.grace;
 	}
 
 	sub vcl_miss {
@@ -31,11 +28,11 @@ varnish v1 -vcl+backend {
 	sub vcl_hit {
 		#std.log("inside vcl_hit");
 		set req.http.x-via = "hit";
-		if (req.request == "PURGE") {
+		if (req.method == "PURGE") {
 			softpurge.softpurge();
 
 			set req.url = "/exists";
-			set req.request = "GET";
+			set req.method = "GET";
 			unset req.http.x-via;
 			return(restart);
 		}
@@ -56,7 +53,6 @@ varnish v1 -vcl+backend {
 		set resp.http.x-via = req.http.x-via;
 
 		set resp.http.x-ttl-negative = req.http.x-ttl-negative;
-
 		#std.log("YY: ttl is " + req.http.x-ttl);
 		#std.log("YY: grace is " + req.http.x-grace);
 	}

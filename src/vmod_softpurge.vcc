@@ -1,3 +1,2 @@
-Module softpurge
-Init init_function
-Function VOID softpurge()
+$Module softpurge VMOD
+$Function VOID softpurge()

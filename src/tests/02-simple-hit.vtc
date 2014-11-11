@@ -10,7 +10,7 @@ varnish v1 -vcl+backend {
 	
 	sub vcl_hit {
 		softpurge.softpurge();
-		error 760 "purged ok";
+		return (synth(760, "purged ok"));
 	}
 } -start
 
