@@ -72,6 +72,7 @@ client c2 {
 	expect resp.http.x-via == "miss"
 	expect resp.status == 200
 	expect resp.http.x-object-hits == 0
+
 	txreq -req "PURGE" -url "/"
 	rxresp
 	expect resp.status == 200
