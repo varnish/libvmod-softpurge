@@ -7,7 +7,6 @@ server s1 {
 
 varnish v1 -vcl+backend {
 	import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
-
 	sub vcl_miss {
 		softpurge.softpurge();
 		return (synth(760, "purged ok"));
