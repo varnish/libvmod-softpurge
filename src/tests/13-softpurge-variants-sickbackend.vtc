@@ -40,7 +40,7 @@ varnish v1 -vcl+backend {
 	}
 
 	sub vcl_backend_response {
-		set beresp.ttl = 1m;
+		set beresp.ttl = 1s;
 		set beresp.grace = 10m;
 
 		#set req.http.x-ttl = beresp.ttl;
@@ -97,6 +97,17 @@ client c1 {
 	txreq -req "PURGE" -url "/" -hdr "User-Agent: one"
 	rxresp
 
+	# if the backend is sick, is the content still there?
+	txreq -url "/" -hdr "User-Agent: two" -hdr "x-sick-please: yes"
+	rxresp
+	expect resp.http.x-via == "hit"
+	expect resp.status == 200
+
+	# if the backend is sick, is the content still there?
+	txreq -url "/" -hdr "User-Agent: one" -hdr "x-sick-please: yes"
+	rxresp
+	expect resp.http.x-via == "hit"
+	expect resp.status == 200
 
 	txreq -url "/" -hdr "User-Agent: one"
 	rxresp
