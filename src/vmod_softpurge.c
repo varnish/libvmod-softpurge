@@ -1,38 +1,10 @@
 #include <stdlib.h>
 
 #include "vrt.h"
-//#include "hash/hash_slinger.h"
 #include "cache/cache.h"
+#include "hash/hash_slinger.h"
+#include "vtim.h"
 #include "vcc_if.h"
-
-struct objhead {
-	unsigned		magic;
-#define OBJHEAD_MAGIC		0x1b96615d
-
-	int			refcnt;
-	struct lock		mtx;
-	VTAILQ_HEAD(,objcore)	objcs;
-	uint8_t			digest[DIGEST_LEN];
-	struct waitinglist	*waitinglist;
-
-	long			hits;
-
-	/*----------------------------------------------------
-	 * The fields below are for the sole private use of
-	 * the hash implementation(s).
-	 */
-	union {
-		struct {
-			VTAILQ_ENTRY(objhead)	u_n_hoh_list;
-			void			*u_n_hoh_head;
-		} n;
-	} _u;
-#define hoh_list _u.n.u_n_hoh_list
-#define hoh_head _u.n.u_n_hoh_head
-};
-
-double VTIM_real(void);
-int HSH_DerefObj(struct dstat *, struct object **o);
 
 void
 vmod_softpurge(const struct vrt_ctx *vrt)

@@ -33,6 +33,17 @@ AM_CONDITIONAL(HAVE_RST2MAN, [test "x$RST2MAN" != "xno"])
 AC_HEADER_STDC
 AC_CHECK_HEADERS([sys/stdlib.h])
 
+# Varnish source tree
+AC_ARG_VAR([VARNISHSRC], [path to Varnish source tree (mandatory)])
+if test "x$VARNISHSRC" = x; then
+	AC_MSG_ERROR([No Varnish source tree specified])
+fi
+VARNISHSRC=`cd $VARNISHSRC && pwd`
+AC_CHECK_FILE([$VARNISHSRC/bin/varnishd/hash],
+		[],
+		[AC_MSG_FAILURE(["$VARNISHSRC" is not a Varnish source directory])]
+)
+
 # Varnish include files tree
 VARNISH_VMOD_INCLUDES
 VARNISH_VMOD_DIR
