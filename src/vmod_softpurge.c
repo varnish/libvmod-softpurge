@@ -44,7 +44,7 @@ vmod_softpurge(const struct vrt_ctx *vrt)
 	struct object *o;
 	unsigned u;
 	double now;
-       
+
 	now = VTIM_real();
 
 	if (vrt->req->obj != NULL) {
@@ -78,7 +78,7 @@ vmod_softpurge(const struct vrt_ctx *vrt)
 			continue;
 		}
 
-		(void)oc_getobj(&vrt->req->wrk->stats, oc); /* XXX: still needed ? I think it's not needed anymore*/
+		//(void)oc_getobj(&vrt->req->wrk->stats, oc); /* XXX: still needed ? I think it's not needed anymore*/
 
 		xxxassert(spc >= sizeof *ocp);
 		oc->refcnt++;
