@@ -11,7 +11,6 @@ varnish v1 -vcl+backend {
 	#import std;
 
 	sub vcl_recv {
-		#set req.grace = 10m;
 		if (req.method == "PURGE") { return(hash); }
 	}
 
@@ -47,8 +46,8 @@ varnish v1 -vcl+backend {
 
 	sub vcl_deliver {
 		set resp.http.x-object-hits = obj.hits;
-		set resp.http.x-object-ttl     = req.http.x-ttl;
-		set resp.http.x-object-grace   = req.http.x-grace;
+		set resp.http.x-object-ttl = req.http.x-ttl;
+		set resp.http.x-object-grace = req.http.x-grace;
 
 		set resp.http.x-via = req.http.x-via;
 
@@ -75,10 +74,10 @@ client c1 {
 	txreq -url "/" -hdr "User-Agent: one"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.x-via == "miss"
+	expect resp.http.x-via == "hit"
 
 	txreq -url "/" -hdr "User-Agent: two"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.x-via == "miss"
+	expect resp.http.x-via == "hit"
 } -run

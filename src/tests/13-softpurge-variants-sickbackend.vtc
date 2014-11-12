@@ -100,6 +100,6 @@ client c1 {
 
 	txreq -url "/" -hdr "User-Agent: one"
 	rxresp
-	expect resp.http.x-via == "miss"
+	expect resp.http.x-via == "hit"
 	expect resp.status == 200
 } -run

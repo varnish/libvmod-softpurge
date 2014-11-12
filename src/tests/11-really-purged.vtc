@@ -42,7 +42,6 @@ varnish v1 -vcl+backend {
 			set req.url = "/exists";
 			set req.method = "GET";
 			unset req.http.x-via;
-	
 			return(restart);
 		}
 		set req.http.x-ttl = obj.ttl;
@@ -72,11 +71,19 @@ client c1 {
 	txreq -req "PURGE" -url "/"
 	rxresp
 
-	# check that it was a miss + successful fetch.
+	# check that grace is used.
 	txreq -url "/"
 	rxresp
-	expect resp.http.x-via == "miss"
+	expect resp.http.x-via == "hit"
 	expect resp.status == 200
-	expect resp.http.x-object-hits == 0
+	expect resp.http.x-object-hits != 0
+
+	# check that the obj was refreshed via a bgfetch in prev req
+	txreq -url "/"
+	rxresp
+	expect resp.http.x-via == "hit"
+	expect resp.status == 200
+	#This can be used in master branch
+	#expect resp.http.x-object-hits == 0
 } -run
 

@@ -69,9 +69,9 @@ client c2 {
 # check that it was a miss + successful fetch.
 	txreq -url "/"
 	rxresp
-	expect resp.http.x-via == "miss"
+	expect resp.http.x-via == "hit"
 	expect resp.status == 200
-	expect resp.http.x-object-hits == 0
+	expect resp.http.x-object-hits != 0
 
 	txreq -req "PURGE" -url "/"
 	rxresp
