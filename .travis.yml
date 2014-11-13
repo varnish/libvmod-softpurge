@@ -11,10 +11,6 @@ before_install:
 - apt-get source -q varnish
 
 before_script:
-- cd varnish*
-- ./configure
-- make
-- cd ..
 - ./autogen.sh
 - ./configure VARNISHSRC=varnish* VMODDIR=`pwd`
 - make
