@@ -10,7 +10,7 @@ before_install:
 
 before_script:
 - ./autogen.sh
-- ./configure VARNISHSRC=varnish* VMODDIR='pwd'
+- ./configure VARNISHSRC= /etc/apt/sources.list.d/varnish-cache.list VMODDIR='pwd'
 - find
 - make -j4
 
