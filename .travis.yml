@@ -3,10 +3,9 @@ language: c
 before_install:
 - sudo apt-get update -q
 - sudo apt-get install -qq apt-transport-https python-docutils
-- apt-get install apt-transport-https
 - curl https://repo.varnish-cache.org/ubuntu/GPG-key.txt | apt-key add -
 - echo "deb https://repo.varnish-cache.org/ubuntu/ precise varnish-4.0" >> /etc/apt/sources.list.d/varnish-cache.list
-- apt-get update
+- sudo apt-get update
 - sudo apt-get install varnish libvarnishapi-dev
 
 before_script:
