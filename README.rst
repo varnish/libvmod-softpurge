@@ -82,25 +82,24 @@ In your VCL you could then use this vmod along the following lines::
         import softpurge;
 
         sub vcl_recv {
-                set req.grace = 10m;
-		if (req.method == "PURGE") { return(lookup); }
+            	if (req.method == "PURGE") { return(hash); }
 	}
         sub vcl_fetch { set beresp.grace = 10m; }
 
         sub vcl_hit {
                 if (req.method == "PURGE) {
 			softpurge.softpurge();
-			error 200 "Successful softpurge";
+			return (synth(200, "Successful softpurge"));
 		}
         }
         sub vcl_miss {
                 if (req.method == "PURGE) {
 			softpurge.softpurge();
-			error 200 "Successful softpurge";
+			return (synth(200, "Successful softpurge"));
 		}
         }
 
 COPYRIGHT
 =========
 
-* Copyright (c) 2012 Varnish Software
+* Copyright (c) 2014 Varnish Software
