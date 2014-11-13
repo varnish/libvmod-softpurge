@@ -2,6 +2,10 @@
 vmod_softpurge
 ==============
 
+.. image:: https://travis-ci.org/aondio/libvmod-softpurge.png
+   :alt: Travis CI badge
+   :target: https://travis-ci.org/aondio/libvmod-softpurge/
+   
 ----------------------
 Softpurge in Varnish
 ----------------------
