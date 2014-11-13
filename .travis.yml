@@ -9,12 +9,12 @@ before_install:
 - sudo apt-get install varnish libvarnishapi-dev
 
 before_script:
-- cd varnish-4.0.2
+- cd varnish-4.0
 - ./configure
 - make
 - cd ..
 - ./autogen.sh
-- ./configure VARNISHSRC=varnish4.0.2 VMODDIR=`pwd`
+- ./configure VARNISHSRC=varnish4.0 VMODDIR=`pwd`
 - make
 - ./autogen.sh
 - ./configure --prefix=/usr
