@@ -11,7 +11,7 @@ before_install:
 before_script:
 - wget https://repo.varnish-cache.org/source/varnish-4.0.2.tar.gz -O - | tar -xz
 - ./autogen.sh
-- ./configure VARNISHSRC=/varnish-4.0.2 --prefix=/usr
+- ./configure VARNISHSRC=varnish-4.0.2 --prefix=/usr
 - make
 
 script:
