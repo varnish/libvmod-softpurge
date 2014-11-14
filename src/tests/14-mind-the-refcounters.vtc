@@ -23,8 +23,8 @@ import softpurge from "${vmod_topbuild}/src/.libs/libvmod_softpurge.so";
 	}
 
 	sub vcl_backend_response {
-		set beresp.ttl = 5s;
-		set beresp.grace = 5s;
+		set beresp.ttl = 1s;
+		set beresp.grace = 1s;
 	}
 
 	sub vcl_miss {
@@ -79,6 +79,6 @@ client c2 {
 	expect resp.http.msg == "Purged"
 } -run
 
-delay 20
+delay 3
 
 varnish v1 -expect n_object == 0
