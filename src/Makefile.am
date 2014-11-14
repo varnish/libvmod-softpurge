@@ -10,8 +10,7 @@ libvmod_softpurge_la_SOURCES = \
 	vcc_if.h \
 	vmod_softpurge.c
 
-vcc_if.c vcc_if.h: 
-	@VMODTOOL@ $(top_srcdir)/src/vmod_softpurge.vcc
+vcc_if.c vcc_if.h: @VMODTOOL@ $(top_srcdir)/src/vmod_softpurge.vcc
 	@VMODTOOL@ $(top_srcdir)/src/vmod_softpurge.vcc
 
 VMOD_TESTS = tests/*.vtc
