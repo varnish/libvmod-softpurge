@@ -35,11 +35,6 @@ AC_CHECK_HEADERS([sys/stdlib.h])
 
 PKG_CHECK_MODULES([libvarnishapi], [varnishapi])
 
-# Varnish include files tree
-VARNISH_VMOD_INCLUDES
-VARNISH_VMOD_DIR
-VARNISH_VMODTOOL
-
 # Varnish source tree
 AC_ARG_VAR([VARNISHSRC], [path to Varnish source tree (mandatory)])
 if test "x$VARNISHSRC" = x; then
@@ -50,6 +45,11 @@ AC_CHECK_FILE([$VARNISHSRC/bin/varnishd/hash],
 		[],
 		[AC_MSG_FAILURE(["$VARNISHSRC" is not a Varnish source directory])]
 )
+
+# Varnish include files tree
+VARNISH_VMOD_INCLUDES
+VARNISH_VMOD_DIR
+VARNISH_VMODTOOL
 
 AC_PATH_PROG([VARNISHTEST], [varnishtest])
 AC_PATH_PROG([VARNISHD], [varnishd], [],
