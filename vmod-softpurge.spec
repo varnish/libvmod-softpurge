@@ -6,19 +6,20 @@ License: BSD
 Group: System Environment/Daemons
 Source0: libvmod-softpurge.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Requires: varnish > 4.0
-BuildRequires: make, python-docutils
+Requires: varnish >= 4.0.2
+BuildRequires: make
+BuildRequires: python-docutils
+BuildRequires: varnish >= 4.0.2
+BuildRequires: varnish-libs-devel >= 4.0.2
 
 %description
 Soft purge support for Varnish VCL
 
 %prep
-%setup -n libvmod-softpurge
+%setup -n libvmod-softpurge-trunk
 
 %build
-# this assumes that VARNISHSRC is defined on the rpmbuild command line, like this:
-# rpmbuild -bb --define 'VARNISHSRC /home/user/rpmbuild/BUILD/varnish-3.0.3' redhat/*spec
-./configure VARNISHSRC=%{VARNISHSRC} VMODDIR="$(PKG_CONFIG_PATH=%{VARNISHSRC} pkg-config --variable=vmoddir varnishapi)" --prefix=/usr/ --docdir='${datarootdir}/doc/%{name}'
+%configure --prefix=/usr
 make
 make check
 
