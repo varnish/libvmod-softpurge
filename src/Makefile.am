@@ -1,4 +1,4 @@
-AM_CPPFLAGS = @VMOD_INCLUDES@ -I foreign
+AM_CPPFLAGS = @VMOD_INCLUDES@ -I$(top_srcdir)/src/foreign
 
 vmoddir = @VMOD_DIR@
 vmod_LTLIBRARIES = libvmod_softpurge.la
