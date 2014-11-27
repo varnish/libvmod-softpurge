@@ -8,7 +8,7 @@ DISTCHECK_CONFIGURE_FLAGS = \
 doc_DATA = README.rst LICENSE
 dist_man_MANS = vmod_softpurge.3
 
-EXTRA_DIST = vmod-*spec debian
+EXTRA_DIST = README.rst LICENSE vmod-softpurge.spec debian
 
 MAINTAINERCLEANFILES = $(dist_man_MANS)
 
