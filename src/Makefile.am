@@ -1,4 +1,4 @@
-AM_CPPFLAGS = @VMOD_INCLUDES@ -I$(VARNISHSRC)/bin/varnishd
+AM_CPPFLAGS = @VMOD_INCLUDES@ -I$/foreign
 
 vmoddir = @VMOD_DIR@
 vmod_LTLIBRARIES = libvmod_softpurge.la
