@@ -25,8 +25,7 @@ make check
 
 %install
 make install DESTDIR=%{buildroot}
-mkdir -p %{buildroot}/usr/share/doc/%{name}
-cp LICENSE COPYING README.rst %{buildroot}/usr/share/doc/%{name}
+mv %{buildroot}/usr/share/doc/lib%{name} %{buildroot}/usr/share/doc/%{name}
 
 %clean
 rm -rf %{buildroot}
