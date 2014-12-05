@@ -10,9 +10,10 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 {
 	struct objcore *oc, **ocp;
 	struct objhead *oh;
-	unsigned spc, nobj, n, ttl;
+	unsigned spc, nobj, n;
+	//unsigned ttl;
 	struct object *o;
-	unsigned u;
+	//unsigned u;
 	double now;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
@@ -74,21 +75,21 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 		CHECK_OBJ_NOTNULL(o, OBJECT_MAGIC);
 
 		/*
-		   object really expires at o->exp.t_origin + o->exp.ttl, or at
-		   an earlier point for this request if overridden in TTL.
+		   object really expires at oc->exp.t_origin + oc->exp.ttl, or
+		   at an earlier point for this request if overridden in TTL.
 		*/
 
 		VSL(SLT_Debug, 0, "XX: object BEFORE.  ttl ends in %.3f, grace ends in %.3f for object %i",
-		    (EXP_Ttl(ctx->req, o) - now),
-		    (EXP_Ttl(ctx->req, o) + o->exp.grace - now), n);
+		    (EXP_Ttl(ctx->req, oc) - now),
+		    (EXP_Ttl(ctx->req, oc) + oc->exp.grace - now), n);
 
-		// Update the object's TTL so that it expires right now.
-		if (o->exp.ttl > (now - o->exp.t_origin))
-			EXP_Rearm(o, now, now - o->exp.t_origin, o->exp.grace, o->exp.keep);
+		/* Update the object's TTL so that it expires right now. */
+		if (oc->exp.ttl > (now - oc->exp.t_origin))
+			EXP_Rearm(oc, now, now - oc->exp.t_origin, oc->exp.grace, oc->exp.keep);
 
 		VSL(SLT_Debug, 0, "XX: object updated. ttl ends in %.3f, grace ends in %.3f for object %i",
-		    (EXP_Ttl(ctx->req, o) - now),
-		    (EXP_Ttl(ctx->req, o) + o->exp.grace - now), n);
+		    (EXP_Ttl(ctx->req, oc) - now),
+		    (EXP_Ttl(ctx->req, oc) + oc->exp.grace - now), n);
 
 		// decrease refcounter and clean up if the object has been removed.
 		(void)HSH_DerefObj(&ctx->req->wrk->stats, &o);
