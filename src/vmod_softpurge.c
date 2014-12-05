@@ -11,9 +11,7 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 	struct objcore *oc, **ocp;
 	struct objhead *oh;
 	unsigned spc, nobj, n;
-	//unsigned ttl;
 	struct object *o;
-	//unsigned u;
 	double now;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
