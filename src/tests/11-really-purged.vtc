@@ -67,6 +67,8 @@ client c1 {
 	expect resp.status == 200
 	expect resp.http.x-via == "hit"
 
+	delay 2
+
 	# run the softpurge
 	txreq -req "PURGE" -url "/"
 	rxresp
@@ -77,6 +79,7 @@ client c1 {
 	expect resp.http.x-via == "hit"
 	expect resp.status == 200
 	expect resp.http.x-object-hits != 0
+	expect resp.http.x-object-ttl <= 0
 
 	# check that the obj was refreshed via a bgfetch in prev req
 	txreq -url "/"
