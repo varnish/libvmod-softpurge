@@ -83,7 +83,7 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 
 		/* Update the object's TTL so that it expires right now. */
 		if (oc->exp.ttl > (now - oc->exp.t_origin))
-			EXP_Rearm(oc, now, now - oc->exp.t_origin, oc->exp.grace, oc->exp.keep);
+			EXP_Rearm(oc, now, 0, oc->exp.grace, oc->exp.keep);
 
 		VSL(SLT_Debug, 0, "XX: object updated. ttl ends in %.3f, grace ends in %.3f for object %i",
 		    (EXP_Ttl(ctx->req, oc) - now),
