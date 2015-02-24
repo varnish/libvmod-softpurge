@@ -1,6 +1,6 @@
 AC_PREREQ(2.64)
 AC_COPYRIGHT([Copyright (c) 2011-2014 Varnish Software AS])
-AC_INIT([libvmod-softpurge], [trunk])
+AC_INIT([libvmod-softpurge-VCP], [trunk])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/vmod_softpurge.vcc)
 AM_CONFIG_HEADER(config.h)
