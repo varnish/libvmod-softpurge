@@ -11,7 +11,6 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 	struct objcore *oc, **ocp;
 	struct objhead *oh;
 	unsigned spc, nobj, n;
-	struct object *o;
 	double now;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
@@ -54,8 +53,6 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 			continue;
 		}
 
-		(void)oc_getobj(&ctx->req->wrk->stats, oc);
-
 		xxxassert(spc >= sizeof *ocp);
 		oc->refcnt++;
 		spc -= sizeof *ocp;
@@ -66,11 +63,6 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 	for (n = 0; n < nobj; n++) {
 		oc = ocp[n];
 		CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
-		o = oc_getobj(&ctx->req->wrk->stats, oc);
-		if (o == NULL) {
-			continue;
-		}
-		CHECK_OBJ_NOTNULL(o, OBJECT_MAGIC);
 
 		/*
 		   object really expires at oc->exp.t_origin + oc->exp.ttl, or
@@ -90,7 +82,7 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 		    (EXP_Ttl(ctx->req, oc) + oc->exp.grace - now), n);
 
 		// decrease refcounter and clean up if the object has been removed.
-		(void)HSH_DerefObj(&ctx->req->wrk->stats, &o);
+		(void)HSH_DerefObjCore(&ctx->req->wrk->stats, &oc);
 	}
 	WS_Release(ctx->ws, 0);
 }
