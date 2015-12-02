@@ -26,8 +26,8 @@ DESCRIPTION
 ``Softpurge`` is cache invalidation in Varnish that reduces TTL but
 keeps the grace value of a resource.
 
-This makes it possible to serve purged content to users if a backend is
-unavailable and fresh content can not be fetched.
+This makes it possible to serve stale content to users if the backend
+is unavailable and fresh content can not be fetched.
 
 FUNCTIONS
 =========
@@ -42,6 +42,7 @@ Return value
 Description
 	Performs a soft purge. Valid in vcl_hit and vcl_miss.
 Example
+	::
 	sub vcl_hit {
 	    if (req.method == "PURGE") {
 	        softpurge.softpurge();
@@ -62,7 +63,7 @@ Usage::
 Make targets:
 
 * make - builds the vmod
-* make install - installs your vmod
+* make install - installs the vmod
 * make check - runs the unit tests in ``src/tests/*.vtc``
 
 In your VCL you could then use this vmod along the following lines::
@@ -96,4 +97,4 @@ In your VCL you could then use this vmod along the following lines::
 COPYRIGHT
 =========
 
-* Copyright (c) 2014-2015 Varnish Software
+* Copyright (c) 2014-2015 Varnish Software Group
