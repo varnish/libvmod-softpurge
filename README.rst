@@ -42,7 +42,7 @@ Return value
 Description
 	Performs a soft purge. Valid in vcl_hit and vcl_miss.
 Example
-	::
+::
 	sub vcl_hit {
 	    if (req.method == "PURGE") {
 	        softpurge.softpurge();
