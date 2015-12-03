@@ -2,18 +2,18 @@
 vmod_softpurge
 ==============
 
-.. image:: https://travis-ci.org/aondio/libvmod-softpurge.png
+.. image:: https://travis-ci.org/varnish/libvmod-softpurge.png
    :alt: Travis CI badge
-   :target: https://travis-ci.org/aondio/libvmod-softpurge/
-   
-----------------------
+   :target: https://travis-ci.org/varnish/libvmod-softpurge
+
+--------------------
 Softpurge in Varnish
-----------------------
+--------------------
 
 :Author: Lasse Karstensen
-:Date: 2012-08-21
+:Date: 2015-12-02
 :Version: 1.0
-:Manual section: 1
+:Manual section: 3
 
 SYNOPSIS
 ========
@@ -23,12 +23,11 @@ import softpurge;
 DESCRIPTION
 ===========
 
-``Softpurge`` is cache invalidation in Varnish that reduces TTL but keeps the grace
-value of a resource.
+``Softpurge`` is cache invalidation in Varnish that reduces TTL but
+keeps the grace value of a resource.
 
-This makes it possible to serve purged content to users if
-a backend is unavailable and fresh content can not be fetched.
-
+This makes it possible to serve stale content to users if the backend
+is unavailable and fresh content can not be fetched.
 
 FUNCTIONS
 =========
@@ -37,23 +36,18 @@ softpurge
 ---------
 
 Prototype
-        ::
-
-                softpurge()
+	softpurge()
 Return value
-	NULL
-
+	NONE
 Description
 	Performs a soft purge. Valid in vcl_hit and vcl_miss.
-
 Example
-        ::
-
-                sub vcl_hit {
-			if (req.method == "PURGE") {
-				softpurge.softpurge();
-			}
-		}
+::
+	sub vcl_hit {
+	    if (req.method == "PURGE") {
+	        softpurge.softpurge();
+	    }
+	}
 
 INSTALLATION
 ============
@@ -64,46 +58,43 @@ using the varnishtest tool.
 
 Usage::
 
- ./configure VARNISHSRC=DIR [VMODDIR=DIR]
-
-`VARNISHSRC` is the directory of the Varnish source tree for which to
-compile your vmod. Both the `VARNISHSRC` and `VARNISHSRC/include`
-will be added to the include search paths for your module.
-
-Optionally you can also set the vmod install directory by adding
-`VMODDIR=DIR` (defaults to the pkg-config discovered directory from your
-Varnish installation).
+./configure
 
 Make targets:
 
 * make - builds the vmod
-* make install - installs your vmod in `VMODDIR`
+* make install - installs the vmod
 * make check - runs the unit tests in ``src/tests/*.vtc``
-
 
 In your VCL you could then use this vmod along the following lines::
 
-        import softpurge;
+    import softpurge;
 
-        sub vcl_recv {
-            	if (req.method == "PURGE") { return(hash); }
-	}
-        sub vcl_fetch { set beresp.grace = 10m; }
+    sub vcl_recv {
+        if (req.method == "PURGE") {
+            return (hash);
+        }
+    }
 
-        sub vcl_hit {
-                if (req.method == "PURGE) {
-			softpurge.softpurge();
-			return (synth(200, "Successful softpurge"));
-		}
+    sub vcl_backend_response {
+        set beresp.grace = 10m;
+    }
+
+    sub vcl_hit {
+        if (req.method == "PURGE") {
+            softpurge.softpurge();
+            return (synth(200, "Successful softpurge"));
         }
-        sub vcl_miss {
-                if (req.method == "PURGE) {
-			softpurge.softpurge();
-			return (synth(200, "Successful softpurge"));
-		}
+    }
+
+    sub vcl_miss {
+        if (req.method == "PURGE") {
+            softpurge.softpurge();
+            return (synth(200, "Successful softpurge"));
         }
+    }
 
 COPYRIGHT
 =========
 
-* Copyright (c) 2014 Varnish Software
+* Copyright (c) 2014-2015 Varnish Software Group
