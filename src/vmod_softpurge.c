@@ -10,7 +10,7 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 {
 	struct objcore *oc, **ocp;
 	struct objhead *oh;
-	unsigned spc, nobj, n, ttl;
+	unsigned spc, nobj, n;
 	struct object *o;
 	double now;
 
