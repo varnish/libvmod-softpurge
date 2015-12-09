@@ -1,21 +1,18 @@
 This is a running log of changes to libvmod-softpurge.
 
-libvmod-softpurge 1.0.0+4.0 (2015-12-09)
-----------------------------------------
+libvmod-softpurge 1.0.0+release (unreleased)
+--------------------------------------------
 
-* Fix issue with correctly setting TTL to zero on Varnish 4.0.
+This release for Varnish Cache 4.1 builds on previous work in the 4.0 branch.
 
-* Versioning scheme changed to new standard.
+The +release versioning means this code originates from the master
+branch in git. The distinction is needed due to overlapping version
+numbers in other branches.
 
-* Packaging files has been retired.
-
-
-Issues fixed:
-
-*  4.0 docs are for 3.0 [Issue #4]
+In the future this branch will follow the latest Varnish Cache version.
 
 There were multiple internal non-tagged releases in the time period between 0.2
-and 1.0.0+4.0. These should not be relied on.
+and 1.0.0+release. These should not be relied on.
 
 
 libvmod-softpurge 0.2 (2014-09-15)

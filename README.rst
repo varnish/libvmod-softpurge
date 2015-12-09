@@ -12,7 +12,7 @@ Softpurge in Varnish
 
 :Author: Lasse Karstensen
 :Date: 2015-12-02
-:Version: 1.0
+:Version: 1.0.0+release
 :Manual section: 3
 
 SYNOPSIS
