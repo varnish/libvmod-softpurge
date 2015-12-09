@@ -5,10 +5,10 @@ SUBDIRS = src
 DISTCHECK_CONFIGURE_FLAGS = \
 	VMOD_DIR='$${libdir}/varnish/vmods'
 
-doc_DATA = README.rst LICENSE
+doc_DATA = README.rst LICENSE CHANGES.rst
 dist_man_MANS = vmod_softpurge.3
 
-EXTRA_DIST = README.rst LICENSE
+EXTRA_DIST = README.rst LICENSE CHANGES.rst
 
 MAINTAINERCLEANFILES = $(dist_man_MANS)
 
