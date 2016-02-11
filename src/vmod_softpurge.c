@@ -47,7 +47,8 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 		assert(oc->objhead == oh);
 		if (oc->flags & OC_F_BUSY)
 			continue;
-		(void)oc_getobj(&ctx->req->wrk->stats, oc);
+		if (oc->exp_flags & OC_EF_DYING)
+			continue;
 		if (spc < sizeof *ocp)
 			break;
 		oc->refcnt++;
@@ -63,8 +64,7 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 		if (o == NULL)
 			continue;
 		CHECK_OBJ_NOTNULL(o, OBJECT_MAGIC);
-		if (o->exp.ttl > (now - o->exp.t_origin))
-			EXP_Rearm(o, now, 0, o->exp.grace, o->exp.keep);
+		EXP_Rearm(o, now, 0, o->exp.grace, o->exp.keep);
 		(void)HSH_DerefObj(&ctx->req->wrk->stats, &o);
 	}
 	WS_Release(ctx->ws, 0);
