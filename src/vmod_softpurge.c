@@ -31,7 +31,8 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 		CHECK_OBJ_NOTNULL(ctx->req->objcore, OBJCORE_MAGIC);
 		CHECK_OBJ_NOTNULL(ctx->req->objcore->objhead, OBJHEAD_MAGIC);
 		oh = ctx->req->objcore->objhead;
-	}
+	} else
+		WRONG("Objhead invalid");
 
 	CHECK_OBJ_NOTNULL(oh, OBJHEAD_MAGIC);
 	spc = WS_Reserve(ctx->ws, 0);
