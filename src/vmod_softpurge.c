@@ -48,7 +48,8 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 		if (oc->flags & OC_F_BUSY)
 			continue;
 		(void)oc_getobj(&ctx->req->wrk->stats, oc);
-		xxxassert(spc >= sizeof *ocp);
+		if (spc < sizeof *ocp)
+			break;
 		oc->refcnt++;
 		spc -= sizeof *ocp;
 		ocp[nobj++] = oc;
