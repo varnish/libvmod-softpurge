@@ -10,7 +10,7 @@ vmod_softpurge(VRT_CTX)
 {
 	struct objcore *oc, **ocp;
 	struct objhead *oh;
-        unsigned spc, ospc, nobj, n;
+	unsigned spc, nobj, n;
 	double now;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
@@ -22,11 +22,10 @@ vmod_softpurge(VRT_CTX)
 
 	CHECK_OBJ_NOTNULL(ctx->req, REQ_MAGIC);
 	oh = ctx->req->objcore->objhead;
-        CHECK_OBJ_NOTNULL(oh, OBJHEAD_MAGIC);
-        ospc = WS_Reserve(ctx->ws, 0);
-        assert(ospc >= sizeof *ocp);
+	CHECK_OBJ_NOTNULL(oh, OBJHEAD_MAGIC);
+	spc = WS_Reserve(ctx->ws, 0);
+	assert(spc >= sizeof *ocp);
 
-	spc = ospc;
 	nobj = 0;
 	ocp = (void*)ctx->ws->f;
 	Lck_Lock(&oh->mtx);
