@@ -25,11 +25,13 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 	if (ctx->req->obj != NULL) {
 		CHECK_OBJ_NOTNULL(ctx->req->obj, OBJECT_MAGIC);
 		CHECK_OBJ_NOTNULL(ctx->req->obj->objcore, OBJCORE_MAGIC);
-		CHECK_OBJ_NOTNULL(ctx->req->obj->objcore->objhead, OBJHEAD_MAGIC);
+		CHECK_OBJ_NOTNULL(ctx->req->obj->objcore->objhead,
+		    OBJHEAD_MAGIC);
 		oh = ctx->req->obj->objcore->objhead;
 	} else if (ctx->req->objcore != NULL) {
 		CHECK_OBJ_NOTNULL(ctx->req->objcore, OBJCORE_MAGIC);
-		CHECK_OBJ_NOTNULL(ctx->req->objcore->objhead, OBJHEAD_MAGIC);
+		CHECK_OBJ_NOTNULL(ctx->req->objcore->objhead,
+		    OBJHEAD_MAGIC);
 		oh = ctx->req->objcore->objhead;
 	} else
 		WRONG("Objhead invalid");
