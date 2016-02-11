@@ -40,9 +40,9 @@ vmod_softpurge(const struct vrt_ctx *ctx)
 
 	nobj = 0;
 	ocp = (void*)ctx->ws->f;
+	now = ctx->req->t_prev;
 	Lck_Lock(&oh->mtx);
 	assert(oh->refcnt > 0);
-	now = ctx->req->t_prev;
 	VTAILQ_FOREACH(oc, &oh->objcs, list) {
 		CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 		assert(oc->objhead == oh);
